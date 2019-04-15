@@ -16,27 +16,13 @@ app.get('/api/v1/users', async (req, res) => await getAllUsers(req, res));
 
 app.post('/api/v1/users', (req, res) => postUser(req, res));
 
-app.get('/api/v1/users/firstname/:firstname', async (req, res) => {
+app.get('/api/v1/users/firstname/:firstname', async (req, res) => await findFirstName(req, res));
 
 
-    users.map((data) => {
-        console.log("A");
-        console.log(data["results"][0].name.first);
-        console.log("B");
-        if (data.name.first === user.firstname) {
-            return res.status(200).send({
-                success: 'true',
-                message: 'User is found',
-                data,
-            });
-        }
-    });
 
-    return res.status(404).send({
-        success: 'false',
-        message: 'user does not exist'
-    });
-});
+// const user = users.find({ firstname });
+// return user;
+
 
 /* Helper Functions */
 
@@ -98,7 +84,7 @@ const postUser = (req, res) => {
             email,
             cell
         } = req.body;
-    
+
         const user = {
             gender,
             firstname,
@@ -106,7 +92,7 @@ const postUser = (req, res) => {
             email,
             cell
         };
-    
+
         users.push(user);
         res.status(201).send({
             success: true,
@@ -117,6 +103,28 @@ const postUser = (req, res) => {
         res.status(400).send({
             success: false,
             message: `Could not create user: need ${errValue}`,
+        });
+    }
+};
+
+const findFirstName = async (req, res) => {
+    try {
+        const firstname = req.params.firstname;
+
+        const result = await users.find(user => user.firstname === firstname);
+
+        if (!result) {
+            throw new Error('User not found');
+        } else {
+            res.status(200).send({
+                user: result,
+            });
+        }
+    } catch (error) {
+        res.status(404).send({
+            success: false,
+            message: 'User not found',
+            error,
         });
     }
 };
