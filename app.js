@@ -14,30 +14,7 @@ const users = [];
 
 app.get('/api/v1/users', async (req, res) => await getAllUsers(req, res));
 
-app.post('/api/v1/users', (req, res) => {
-    const {
-        gender,
-        firstname,
-        city,
-        email,
-        cell
-    } = req.body;
-    
-    const user = {
-        gender,
-        firstname,
-        city,
-        email,
-        cell
-    };
-
-    users.push(user);
-    return res.status(201).send({
-        success: true,
-        message: 'User sucessfully created',
-        users,
-    });
-});
+app.post('/api/v1/users', (req, res) => postUser(req, res));
 
 app.get('/api/v1/users/firstname/:firstname', async (req, res) => {
 
@@ -87,7 +64,57 @@ const getAllUsers = async (req, res) => {
         });
     }
     catch (error) {
-        console.error(error);
+        
+    }
+};
+
+const postUser = (req, res) => {
+    try {
+        let errValue = '';
+        switch (req.body) {
+            case !req.body.gender:
+                errValue = 'gender';
+                throw new Error('No gender');
+            case !req.body.firstname:
+                errValue = 'firstname';
+                throw new Error('No firstname');
+            case !req.body.city:
+                errValue = 'city';
+                throw new Error('No city');
+            case !req.body.email:
+                errValue = 'email';
+                throw new Error('No email');
+            case !req.body.cell:
+                errValue = 'cell';
+                throw new Error('No cell');
+        }
+        const {
+            gender,
+            firstname,
+            city,
+            email,
+            cell
+        } = req.body;
+    
+        const user = {
+            gender,
+            firstname,
+            city,
+            email,
+            cell
+        };
+    
+        users.push(user);
+        res.status(201).send({
+            success: true,
+            message: 'User sucessfully created',
+            users,
+        });
+    } catch (error) {
+        res.status(400).send({
+            success: false,
+            message: `Could not create user: need ${errValue}`,
+        });
     }
 };
 
